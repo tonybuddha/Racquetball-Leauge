@@ -606,6 +606,15 @@ A **Fault** results in the loss of serve (known as a "Sideout"). The server is a
                         </div>
                     </div>
                 </div>
+                
+                <div id="scoring-rules" class="p-4 mb-4 bg-red-800/20 border border-red-400 rounded-xl text-sm text-red-200">
+                    <h3 class="font-bold text-base text-red-300 mb-1">Mandatory League Scoring Rules:</h3>
+                    <ul class="list-disc list-inside ml-2 mt-1 space-y-0.5">
+                        <li>The **winning score** in a game must be **at least 15 points** (e.g., 15-10, 15-14).</li>
+                        <li>If the winning score is **greater than 15**, the winner must lead by **at least 2 points** (e.g., 16-14 is valid, 16-15 is not).</li>
+                    </ul>
+                </div>
+
 
                 <div id="score-entry">
                     ${gamesHTML}
@@ -669,6 +678,23 @@ A **Fault** results in the loss of serve (known as a "Sideout"). The server is a
                     showMessageModal("Validation Error", "Game scores cannot be tied.");
                     return;
                 }
+                
+                const winnerScore = Math.max(game.scoreA, game.scoreB);
+                const loserScore = Math.min(game.scoreA, game.scoreB);
+
+                // NEW SCORING RULE 1: Winning score must be at least 15.
+                if (winnerScore < 15) {
+                    showMessageModal("Validation Error", `Game scores must follow league rules. The winning score must be at least 15 points. Check Game ${gameScores.indexOf(game) + 1}.`);
+                    return;
+                }
+                
+                // NEW SCORING RULE 2: If the winning score is over 15, the margin must be at least 2 points.
+                if (winnerScore > 15 && (winnerScore - loserScore < 2)) {
+                    showMessageModal("Validation Error", `Game scores must follow league rules. For scores over 15, the winner must lead by at least 2 points (e.g., 16-14, not 16-15). Check Game ${gameScores.indexOf(game) + 1}.`);
+                    return;
+                }
+
+
                 
                 games.push({ 
                     winner: winnerId, 
