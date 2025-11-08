@@ -38,6 +38,7 @@
             <h1 class="text-3xl font-extrabold text-white tracking-tight">
                 <i class="fas fa-table-tennis mr-2 text-orange-500"></i> League Tracker
             </h1>
+            <!-- The status text here will no longer show the User ID -->
             <p id="auth-status" class="text-xs text-gray-500 mt-1"></p>
         </header>
 
@@ -47,7 +48,7 @@
             <button class="tab-button px-4 py-3 text-sm transition duration-150" data-tab="log">Log Match</button>
             <button class="tab-button px-4 py-3 text-sm transition duration-150" data-tab="schedule">Schedule</button>
             <button class="tab-button px-4 py-3 text-sm transition duration-150" data-tab="rules">Rules</button>
-            <!-- Reset button is here, protected by the modal -->
+            <!-- Reset button -->
             <button id="reset-btn" class="px-2 text-xs text-red-500 hover:text-red-400 transition duration-150" title="Reset League"><i class="fas fa-undo"></i></button>
         </nav>
 
@@ -140,7 +141,7 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                document.getElementById('auth-status').textContent = 'Authenticating...';
+                document.getElementById('auth-status').textContent = 'Connecting...';
 
                 // Sign In using custom token or anonymously
                 if (initialAuthToken) {
@@ -153,7 +154,8 @@
                     if (user) {
                         userId = user.uid;
                         isAuthReady = true;
-                        document.getElementById('auth-status').textContent = `User ID: ${userId}`;
+                        // Hiding the long User ID as requested by the user.
+                        document.getElementById('auth-status').textContent = 'Ready to play!'; 
                         loadData();
                         renderApp();
                     } else {
@@ -336,7 +338,6 @@
                 <div class="ranking-card flex items-center p-4 mb-3 bg-gray-700 rounded-xl shadow-md border-l-4 border-orange-500">
                     <div class="w-8 text-2xl font-black text-orange-500 mr-4">${p.rank}.</div>
                     <div class="flex-grow">
-                        <!-- User requested to remove the ID, displaying only the name -->
                         <p class="text-lg font-semibold">${p.name}</p>
                     </div>
                     <div class="text-right">
