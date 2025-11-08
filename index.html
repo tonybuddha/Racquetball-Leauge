@@ -122,7 +122,44 @@
         let matches = [];
         let activeTab = 'rankings';
         let isAuthReady = false;
-        let rulesContent = null;
+        
+        // --- Hardcoded Rules Content (Bypasses API fetch, fixing the issue) ---
+        let rulesContent = `
+## Official Racquetball Rules (League Standard)
+
+These rules are based on standard professional racquetball regulations, adapted for our league play.
+
+### I. Serving Rules
+
+1.  **Start of Play:** The server must hit the ball from the **service zone** (between the short line and the service line).
+2.  **Service Motion:** The ball must hit the **front wall first** and then, without touching the floor, land behind the **short line**.
+3.  **Hinderance:** The receiver must stand behind the receiving line until the ball passes the short line.
+4.  **Foot Faults:** The server must remain in the service zone until the ball passes the short line. Stepping over the service line before the ball passes the short line is a fault.
+
+### II. Faults
+
+A **Fault** results in the loss of serve (known as a "Sideout"). The server is allowed **two** faults. A third fault in a row results in a sideout.
+
+1.  **Long Service:** The served ball hits the front wall and then hits the back wall *before* bouncing on the floor (not a fault if touched by the ceiling).
+2.  **Short Service:** The served ball hits the floor *before* crossing the short line.
+3.  **Ceiling Service:** The served ball hits the ceiling *after* hitting the front wall.
+
+### III. Rallies
+
+1.  **Return:** The ball must be hit before it bounces twice.
+2.  **Legal Hit:** The ball must hit the front wall either directly or after hitting one side wall.
+3.  **Sideout:** If the server loses the rally, a sideout occurs, and the opponent becomes the new server.
+4.  **Point:** If the receiver loses the rally, the server scores a point and continues serving (in standard rules, only the server can score).
+
+### IV. Scoring (League Specific)
+
+1.  **Game Format:** Matches consist of **three** games.
+2.  **Game Score:** Each game is played until a predetermined score (e.g., 15) is reached, with no requirement for a two-point difference.
+3.  **League Points:** For league ranking:
+    * The **winner** of a single game (by score) is awarded **3 points** in the league rankings.
+    * The total league points are the sum of points earned from all games played.
+4.  **Weekly Limit:** Players are limited to logging **one match per week** (Monday to Sunday) to ensure fair play and rotation.
+`;
         const MAX_PLAYERS = 8;
         const RESET_PASSWORD = 'reset'; // The requested password for league reset
 
@@ -765,72 +802,10 @@
         
         // --- Tab 4: Rules ---
 
-        async function fetchRules() {
-            if (rulesContent) return; // Only fetch once
-            
-            showMessageModal("Loading Rules", "Fetching racquetball rules from the AI tutor...", true);
-
-            const systemPrompt = "You are a helpful assistant for a racquetball league. Provide concise, clearly sectioned rules of racquetball that are easy to search.";
-            const userQuery = "Provide the official rules of racquetball, focusing on serving, faults, rallies, and scoring. Format them as a single string of markdown content. Do not use any special HTML or JavaScript code.";
-            const apiKey = "" // Leave this as-is
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                tools: [{ "google_search": {} }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-            };
-            
-            const maxRetries = 3;
-            let lastError = null;
-            
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.status === 429 && i < maxRetries - 1) {
-                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        continue; // Retry
-                    }
-
-                    const result = await response.json();
-                    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                    if (text) {
-                        rulesContent = text;
-                        hideMessageModal();
-                        renderApp();
-                        return;
-                    }
-                } catch (error) {
-                    lastError = error;
-                }
-            }
-            
-            console.error("Failed to fetch rules after retries:", lastError);
-            rulesContent = "## Rules could not be loaded\n\nFailed to fetch the rules. Please try again later. Standard rules apply:\n* Server must hit the front wall first.\n* Two serves allowed (faults).\n* Rallies are generally played to 15 points, but in this league, games are played to a simple score (e.g., 15) with no point cap difference.\n* Winner of a game gets 3 points.";
-            hideMessageModal();
-            renderApp();
-        }
+        // The old fetchRules function was removed, and the content is hardcoded into the rulesContent variable.
 
         function renderRules(container) {
-            if (!rulesContent) {
-                fetchRules(); // Trigger fetch if not loaded
-                container.innerHTML = `
-                    <div class="text-center p-8 bg-gray-700 rounded-xl">
-                        <i class="fas fa-search text-4xl mb-3 text-orange-500 animate-pulse"></i>
-                        <p class="text-lg font-semibold">Loading Racquetball Rules...</p>
-                        <p class="text-gray-400">The rules are being fetched by the AI tutor. This may take a moment.</p>
-                    </div>
-                `;
-                return;
-            }
-
+            
             container.innerHTML = `
                 <h2 class="text-2xl font-bold mb-4">Official Racquetball Rules</h2>
                 <div class="mb-4">
